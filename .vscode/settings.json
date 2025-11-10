@@ -14,6 +14,6 @@
     "objectscript.conn": {
         "server": "iriscnet",
         "ns": "DEMO",
-        "active": false
+        "active": true
     }
 }

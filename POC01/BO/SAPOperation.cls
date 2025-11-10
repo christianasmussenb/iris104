@@ -22,7 +22,7 @@ Property SAPLanguage As %String [ InitialExpression = "ES" ];
 Property SAPSystemNumber As %String [ InitialExpression = "00" ];
 
 /// Nombre del item de configuración Java Gateway
-Property JavaGatewayConfigItemName As %String [ InitialExpression = "JG" ];
+Property JavaGatewayConfigItemName As %String [ InitialExpression = "POC01.Services.JavaGatewayService" ];
 
 /// Manejador de respuesta SAP
 Property SAPResponseHandler As %String;
@@ -41,25 +41,5 @@ Property SAPR3Name As %String [ InitialExpression = "CNQ" ];
 
 /// Nivel de trace SAP
 Property SAPTraceLevel As %String [ InitialExpression = "1" ];
-
-/// Método para inicializar la conexión
-Method OnInit() As %Status
-{
-	// Configurar parámetros de conexión SAP
-	Set ..Adapter.SAPClient = ..SAPClient
-	Set ..Adapter.SAPCredentials = ..SAPCredentials
-	Set ..Adapter.SAPHost = ..SAPHost
-	Set ..Adapter.SAPLanguage = ..SAPLanguage
-	Set ..Adapter.SAPSystemNumber = ..SAPSystemNumber
-	Set ..Adapter.JavaGatewayConfigItemName = ..JavaGatewayConfigItemName
-	Set ..Adapter.SAPResponseHandler = ..SAPResponseHandler
-	Set ..Adapter.SAPGWHost = ..SAPGWHost
-	Set ..Adapter.SAPGWServ = ..SAPGWServ
-	Set ..Adapter.SAPMSHost = ..SAPMSHost
-	Set ..Adapter.SAPR3Name = ..SAPR3Name
-	Set ..Adapter.SAPTraceLevel = ..SAPTraceLevel
-	
-	Quit ##super()
-}
 
 }
