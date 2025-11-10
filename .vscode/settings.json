@@ -1,0 +1,13 @@
+{
+    "intersystems.servers": {
+        "iriscnet": {
+            "webServer": {
+                "scheme": "http",
+                "host": "172.10.250.26",
+                "port": 80,
+                "pathPrefix": "/irisestandar"
+            },
+            "username": "superuser"
+        }
+    }
+}
