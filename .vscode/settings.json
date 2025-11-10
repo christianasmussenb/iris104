@@ -9,5 +9,10 @@
             },
             "username": "superuser"
         }
+    },
+    "objectscript.conn": {
+        "server": "iriscnet",
+        "ns": "DEMO",
+        "active": true
     }
 }

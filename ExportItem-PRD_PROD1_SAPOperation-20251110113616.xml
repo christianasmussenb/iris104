@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Class name="BAPI.Services.UserServicesBS">
+<Super>Ens.BusinessService</Super>
+<TimeCreated>67494,49655.243256964</TimeCreated>
+
+<Method name="OnProcessInput">
+<FormalSpec>pInput:BAPI.Services.UserServicesReq,*pOutput:BAPI.Services.UserServicesRes</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+	set tSC= $System.Status.OK()
+	try {
+		set p = ##class(BAPI.USER.LOCK.ISCuRequest).%New()
+		set p.USERNAME= pInput.USERNAME
+		set tSC = ..SendRequestAsync("SAPOperation", p, .res)
+		w res.respuesta
+	} catch mierror{
+		set ex = mierror.AsStatus()
+	}
+	
+	quit tSC
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="BAPI.Services.UserServicesReq">
+<Super>Ens.Request</Super>
+<TimeCreated>67494,49341.18110343</TimeCreated>
+
+<Property name="USERNAME">
+<Type>%String</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>UserServicesReqDefaultData</DefaultData>
+<Data name="UserServicesReqDefaultData">
+<Subscript>"UserServicesReq"</Subscript>
+<Value name="1">
+<Value>USERNAME</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="BAPI.Services.UserServicesRes">
+<Super>Ens.Response</Super>
+<TimeCreated>67494,49438.722621378</TimeCreated>
+
+<Property name="Respuesta">
+<Type>%String</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>UserServicesResDefaultData</DefaultData>
+<Data name="UserServicesResDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"UserServicesRes"</Subscript>
+<Value name="1">
+<Value>Respuesta</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="BAPI.USER.LOCK.ISCuRequest">
+<ProcedureBlock>1</ProcedureBlock>
+<SqlTableName>ISCuRequest</SqlTableName>
+<Super>Ens.Request</Super>
+<TimeCreated>67493,53964.7546177</TimeCreated>
+
+<Property name="USERNAME">
+<Description>
+USERNAME
+[CHAR] User Name</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="12"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="USERNAME"/>
+</Property>
+
+<Property name="RETURN">
+<Description>
+RETURN
+[Relationship master side] object reference to RETURN details</Description>
+<Type>RETURNreq</Type>
+<Cardinality>children</Cardinality>
+<Inverse>ISCuRequest</Inverse>
+<Relationship>1</Relationship>
+<Parameter name="XMLNAME" value="RETURN"/>
+</Property>
+
+<Parameter name="BAPI">
+<Description>
+This Request message corresponds to SAP BAPI/RFC: BAPI_USER_LOCK</Description>
+<Type>%String</Type>
+<Default>BAPI_USER_LOCK</Default>
+</Parameter>
+
+<Parameter name="RESPONSECLASSNAME">
+<Description>
+This Response message corresponds this Request </Description>
+<Type>%String</Type>
+<Default>BAPI.USER.LOCK.ISCuResponse</Default>
+</Parameter>
+
+<Parameter name="XMLNAME">
+<Type>%String</Type>
+<Default>ISCuRequest</Default>
+</Parameter>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>ISCuRequestDefaultData</DefaultData>
+<Data name="ISCuRequestDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"ISCuRequest"</Subscript>
+<Value name="1">
+<Value>USERNAME</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="BAPI.USER.LOCK.RETURNreq">
+<ProcedureBlock>1</ProcedureBlock>
+<SqlTableName>RETURNreq</SqlTableName>
+<Super>%Persistent,%XML.Adaptor</Super>
+<TimeCreated>67493,53964.7705568</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="TYPE">
+<Description>
+TYPE
+[CHAR] Message type: S Success, E Error, W Warning, I Info, A Abort</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="TYPE"/>
+</Property>
+
+<Property name="ID">
+<Description>
+ID
+[CHAR] Message Class</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="ID"/>
+</Property>
+
+<Property name="NUMBER">
+<Description>
+NUMBER
+[NUM] Message Number</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="NUMBER"/>
+</Property>
+
+<Property name="MESSAGE">
+<Description>
+MESSAGE
+[CHAR] Message Text</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="MESSAGE"/>
+</Property>
+
+<Property name="LOGuNO">
+<Description>
+LOG_NO
+[CHAR] Application log: log number</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="LOGuNO"/>
+</Property>
+
+<Property name="LOGuMSGuNO">
+<Description>
+LOG_MSG_NO
+[NUM] Application log: Internal message serial number</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="LOGuMSGuNO"/>
+</Property>
+
+<Property name="MESSAGEuV1">
+<Description>
+MESSAGE_V1
+[CHAR] Message Variable</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="MESSAGEuV1"/>
+</Property>
+
+<Property name="MESSAGEuV2">
+<Description>
+MESSAGE_V2
+[CHAR] Message Variable</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="MESSAGEuV2"/>
+</Property>
+
+<Property name="MESSAGEuV3">
+<Description>
+MESSAGE_V3
+[CHAR] Message Variable</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="MESSAGEuV3"/>
+</Property>
+
+<Property name="MESSAGEuV4">
+<Description>
+MESSAGE_V4
+[CHAR] Message Variable</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="MESSAGEuV4"/>
+</Property>
+
+<Property name="PARAMETER">
+<Description>
+PARAMETER
+[CHAR] Parameter Name</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="PARAMETER"/>
+</Property>
+
+<Property name="ROW">
+<Description>
+ROW
+[INT] Lines in parameter</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="ROW"/>
+</Property>
+
+<Property name="FIELD">
+<Description>
+FIELD
+[CHAR] Field in parameter</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="FIELD"/>
+</Property>
+
+<Property name="SYSTEM">
+<Description>
+SYSTEM
+[CHAR] Logical system from which message originates</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="XMLNAME" value="SYSTEM"/>
+</Property>
+
+<Property name="ISCuRequest">
+<Description>
+ISCuRequest
+[Relationship detail side] object reference to the request message</Description>
+<Type>ISCuRequest</Type>
+<Cardinality>parent</Cardinality>
+<Inverse>RETURN</Inverse>
+<Relationship>1</Relationship>
+<Parameter name="XMLNAME" value="ISCuRequest"/>
+</Property>
+
+<Parameter name="XMLNAME">
+<Type>%String</Type>
+<Default>RETURN</Default>
+</Parameter>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DataLocation>{%%PARENT}("BAPI.USER.LOCK.ISCuRequest.RETURN")</DataLocation>
+<DefaultData>RETURNreqDefaultData</DefaultData>
+<IdLocation>^BAPI.USER.LOCK.ISCuRequestC("RETURN")</IdLocation>
+<IndexLocation>^BAPI.USER.LOCK.RETURNreqI</IndexLocation>
+<StreamLocation>^BAPI.USER.LOCK.RETURNreqS</StreamLocation>
+<Data name="RETURNreqDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>TYPE</Value>
+</Value>
+<Value name="3">
+<Value>ID</Value>
+</Value>
+<Value name="4">
+<Value>NUMBER</Value>
+</Value>
+<Value name="5">
+<Value>MESSAGE</Value>
+</Value>
+<Value name="6">
+<Value>LOGuNO</Value>
+</Value>
+<Value name="7">
+<Value>LOGuMSGuNO</Value>
+</Value>
+<Value name="8">
+<Value>MESSAGEuV1</Value>
+</Value>
+<Value name="9">
+<Value>MESSAGEuV2</Value>
+</Value>
+<Value name="10">
+<Value>MESSAGEuV3</Value>
+</Value>
+<Value name="11">
+<Value>MESSAGEuV4</Value>
+</Value>
+<Value name="12">
+<Value>PARAMETER</Value>
+</Value>
+<Value name="13">
+<Value>ROW</Value>
+</Value>
+<Value name="14">
+<Value>FIELD</Value>
+</Value>
+<Value name="15">
+<Value>SYSTEM</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Project name="EnsExportItem_2025-11-10 11-36-15_759-5" LastModified="2025-11-10 11:38:58.7891299">
+  <ProjectDescription>Studio Project generated starting from Production Configuration Item 'PRD.PROD1 : SAPOperation' at 2025-11-10 16:36:15.759 UTC</ProjectDescription>
+  <Items>
+    <ProjectItem name="BAPI.Services.UserServicesBS" type="CLS"></ProjectItem>
+    <ProjectItem name="BAPI.Services.UserServicesReq" type="CLS"></ProjectItem>
+    <ProjectItem name="BAPI.Services.UserServicesRes" type="CLS"></ProjectItem>
+    <ProjectItem name="BAPI.USER.LOCK.ISCuRequest" type="CLS"></ProjectItem>
+    <ProjectItem name="BAPI.USER.LOCK.RETURNreq" type="CLS"></ProjectItem>
+    <ProjectItem name="Settings:BAPI.Services.UserServicesBS.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:SAPOperation.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="EnsExportNotes.EnsExportItem_2025-11-10 11-36-15_759-5.PTD" type="PTD"></ProjectItem>
+  </Items>
+</Project>
+
+
+<Document name="EnsExportNotes.EnsExportItem_2025-11-10 11-36-15_759-5.PTD"><ProjectTextDocument name="EnsExportNotes.EnsExportItem_2025-11-10 11-36-15_759-5" description="Export Notes for export EnsExportItem_2025-11-10 11-36-15_759-5">
+<![CDATA[<Deployment>
+<Creation>
+<Machine>IRISCNET</Machine>
+<Instance>IRISESTANDAR</Instance>
+<Namespace>CNET</Namespace>
+<SourceProduction>PRD.PROD1</SourceProduction>
+<Username>SuperUser</Username>
+<UTC>2025-11-10 16:38:58.785</UTC>
+</Creation>
+<Notes>
+</Notes>
+<Contents>
+<ExportProject>EnsExportItem_2025-11-10 11-36-15_759-5</ExportProject>
+<Item num="1">BAPI.Services.UserServicesBS.CLS</Item>
+<Item num="2">BAPI.Services.UserServicesReq.CLS</Item>
+<Item num="3">BAPI.Services.UserServicesRes.CLS</Item>
+<Item num="4">BAPI.USER.LOCK.ISCuRequest.CLS</Item>
+<Item num="5">BAPI.USER.LOCK.RETURNreq.CLS</Item>
+<Item num="6">Settings:BAPI.Services.UserServicesBS.PTD</Item>
+<Item num="7">Settings:SAPOperation.PTD</Item>
+</Contents>
+<ProductionClassInExport></ProductionClassInExport>
+</Deployment>
+
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:BAPI.Services.UserServicesBS.PTD"><ProjectTextDocument name="Settings:BAPI.Services.UserServicesBS" description="Settings for BAPI.Services.UserServicesBS in Production PRD.PROD1">
+<![CDATA[<Item Name="BAPI.Services.UserServicesBS" Category="" ClassName="BAPI.Services.UserServicesBS" PoolSize="0" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:SAPOperation.PTD"><ProjectTextDocument name="Settings:SAPOperation" description="Settings for SAPOperation in Production PRD.PROD1">
+<![CDATA[<Item Name="SAPOperation" Category="" ClassName="EnsLib.SAP.Operation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Host" Name="SAPClient">600</Setting><Setting Target="Host" Name="SAPCredentials">CNETuser</Setting><Setting Target="Host" Name="SAPHost">cnetdev</Setting><Setting Target="Host" Name="SAPLanguage">ES</Setting><Setting Target="Host" Name="SAPSystemNumber">00</Setting><Setting Target="Host" Name="JavaGatewayConfigItemName">JG</Setting><Setting Target="Host" Name="SAPResponseHandler"></Setting><Setting Target="Host" Name="SAPGWHost">cnetdev</Setting><Setting Target="Host" Name="SAPGWServ">3300</Setting><Setting Target="Host" Name="SAPMSHost">cnetdev</Setting><Setting Target="Host" Name="SAPR3Name">CNQ</Setting><Setting Target="Host" Name="SAPTraceLevel">1</Setting></Item>
+]]></ProjectTextDocument>
+</Document></Export>
