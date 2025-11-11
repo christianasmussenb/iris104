@@ -3,11 +3,12 @@
         "iriscnet": {
             "webServer": {
                 "scheme": "http",
-                "host": "172.10.250.26",
+                "host": "iriscnet",
                 "port": 80,
                 "pathPrefix": "/irisestandar"
             },
-            "username": "superuser"
+            "username": "admin",
+            "password": "Compunet123."
         }
     },
     "objectscript.conn": {
