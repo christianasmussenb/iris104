@@ -12,8 +12,8 @@
         }
     },
     "objectscript.conn": {
-        "server": "iriscnet",
+        "server": "iriscnet2",
         "ns": "DEMO",
-        "active": false
+        "active": true
     }
 }
