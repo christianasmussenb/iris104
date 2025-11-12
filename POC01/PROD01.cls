@@ -25,7 +25,13 @@ XData ProductionDefinition
     <Setting Target="Host" Name="SAPSystemNumber">00</Setting>
     <Setting Target="Host" Name="SAPTraceLevel">1</Setting>
   </Item>
-  <Item Name="POC01.BP.GetUserListBP" Category="" ClassName="POC01.BP.GetUserListBP" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+  <Item Name="POC01.BP.GetUserListBP" Category="" ClassName="POC01.BP.GetUserListBP" PoolSize="1" Enabled="true" Foreground="false" Comment="Business Process para obtener lista de usuarios SAP" LogTraceEvents="true" Schedule="">
+  </Item>
+  <Item Name="POC01.BP.CheckUserExistenceBP" Category="" ClassName="POC01.BP.CheckUserExistenceBP" PoolSize="1" Enabled="true" Foreground="false" Comment="Business Process para verificar existencia de usuario SAP" LogTraceEvents="true" Schedule="">
+  </Item>
+  <Item Name="POC01.BP.LockUserBP" Category="" ClassName="POC01.BP.LockUserBP" PoolSize="1" Enabled="true" Foreground="false" Comment="Business Process para bloquear usuario SAP" LogTraceEvents="true" Schedule="">
+  </Item>
+  <Item Name="POC01.BP.UnlockUserBP" Category="" ClassName="POC01.BP.UnlockUserBP" PoolSize="1" Enabled="true" Foreground="false" Comment="Business Process para desbloquear usuario SAP" LogTraceEvents="true" Schedule="">
   </Item>
 </Production>
 }
