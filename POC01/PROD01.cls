@@ -6,6 +6,8 @@ XData ProductionDefinition
 <Production Name="POC01.PROD01" TestingEnabled="true" LogGeneralTraceEvents="true">
   <Description></Description>
   <ActorPoolSize>2</ActorPoolSize>
+  <Item Name="POC01.API.UserManagementService" Category="" ClassName="POC01.API.UserManagementService" PoolSize="1" Enabled="true" Foreground="false" Comment="REST API Service para gestión de usuarios" LogTraceEvents="true" Schedule="">
+  </Item>
   <Item Name="POC01.Services.JavaGatewayService" Category="" ClassName="POC01.Services.JavaGatewayService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
     <Setting Target="Host" Name="Port">55558</Setting>
   </Item>
