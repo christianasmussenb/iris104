@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios SAP - POC01</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🔐 Sistema de Gestión de Usuarios SAP</h1>
+            <p class="subtitle">POC01 - User Management via BAPI</p>
+        </header>
+
+        <!-- Authentication Section -->
+        <section class="auth-section" id="authSection">
+            <div class="card">
+                <h2>Autenticación</h2>
+                <form id="authForm">
+                    <div class="form-group">
+                        <label for="username">Usuario IRIS:</label>
+                        <input type="text" id="username" name="username" required placeholder="Ingrese su usuario">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required placeholder="Ingrese su password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Main Content (Hidden until authenticated) -->
+        <main class="main-content hidden" id="mainContent">
+            
+            <!-- User Info Bar -->
+            <div class="user-bar">
+                <span>Conectado como: <strong id="currentUser"></strong></span>
+                <button class="btn btn-secondary btn-small" id="logoutBtn">Cerrar Sesión</button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="list">📋 Listar Usuarios</button>
+                <button class="tab-btn" data-tab="check">🔍 Verificar Usuario</button>
+                <button class="tab-btn" data-tab="lock">🔒 Bloquear Usuario</button>
+                <button class="tab-btn" data-tab="unlock">🔓 Desbloquear Usuario</button>
+            </div>
+
+            <!-- Tab 1: List Users -->
+            <div class="tab-content active" id="tab-list">
+                <div class="card">
+                    <h2>Listar Usuarios SAP</h2>
+                    <form id="listForm">
+                        <div class="form-group">
+                            <label for="maxRows">Máximo de registros:</label>
+                            <input type="number" id="maxRows" name="maxRows" value="20" min="1" max="100">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Obtener Lista</button>
+                    </form>
+                    <div id="listResult" class="result"></div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Check User -->
+            <div class="tab-content" id="tab-check">
+                <div class="card">
+                    <h2>Verificar Existencia de Usuario</h2>
+                    <form id="checkForm">
+                        <div class="form-group">
+                            <label for="checkUsername">Nombre de usuario SAP:</label>
+                            <input type="text" id="checkUsername" name="username" required placeholder="Ej: ADSUSER">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Verificar</button>
+                    </form>
+                    <div id="checkResult" class="result"></div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Lock User -->
+            <div class="tab-content" id="tab-lock">
+                <div class="card">
+                    <h2>Bloquear Usuario SAP</h2>
+                    <form id="lockForm">
+                        <div class="form-group">
+                            <label for="lockUsername">Nombre de usuario SAP:</label>
+                            <input type="text" id="lockUsername" name="username" required placeholder="Ej: TESTUSER">
+                        </div>
+                        <button type="submit" class="btn btn-danger">Bloquear Usuario</button>
+                    </form>
+                    <div id="lockResult" class="result"></div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Unlock User -->
+            <div class="tab-content" id="tab-unlock">
+                <div class="card">
+                    <h2>Desbloquear Usuario SAP</h2>
+                    <form id="unlockForm">
+                        <div class="form-group">
+                            <label for="unlockUsername">Nombre de usuario SAP:</label>
+                            <input type="text" id="unlockUsername" name="username" required placeholder="Ej: TESTUSER">
+                        </div>
+                        <button type="submit" class="btn btn-success">Desbloquear Usuario</button>
+                    </form>
+                    <div id="unlockResult" class="result"></div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>POC01 - SAP User Management System | InterSystems IRIS + SAP JCo 3.1</p>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Procesando...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
