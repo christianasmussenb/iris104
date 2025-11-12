@@ -12,4 +12,7 @@ Property JavaHome As %String(MAXLEN = 1000) [ InitialExpression = "C:\Program Fi
 /// Ruta al archivo JAR de SAP JCo (Java Connector)
 Property ClassPath As %String(MAXLEN = 1000) [ InitialExpression = "C:\Users\iriscnet-admin\Desktop\sapjco31P_12-20009381\JCO\sapjco3.jar" ];
 
+/// Puerto específico para este Java Gateway (default: 55556)
+Property Port As %String [ InitialExpression = "55558" ];
+
 }

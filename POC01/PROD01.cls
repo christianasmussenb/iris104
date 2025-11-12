@@ -25,6 +25,8 @@ XData ProductionDefinition
     <Setting Target="Host" Name="SAPSystemNumber">00</Setting>
     <Setting Target="Host" Name="SAPTraceLevel">1</Setting>
   </Item>
+  <Item Name="POC01.BP.GetUserListBP" Category="" ClassName="POC01.BP.GetUserListBP" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+  </Item>
 </Production>
 }
 

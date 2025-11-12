@@ -13,6 +13,6 @@ Property JavaHome As %String(MAXLEN = 1000) [ InitialExpression = "C:\Program Fi
 Property ClassPath As %String(MAXLEN = 1000) [ InitialExpression = "C:\Users\iriscnet-admin\Desktop\sapjco31P_12-20009381\JCO\sapjco3.jar" ];
 
 /// Puerto específico para este Java Gateway (default: 55556)
-Property Port As %Integer [ InitialExpression = 55556 ];
+Property Port As %String [ InitialExpression = "55559" ];
 
 }
