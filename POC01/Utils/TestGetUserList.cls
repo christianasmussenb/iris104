@@ -1,31 +1,40 @@
 Class POC01.Utils.TestGetUserList Extends %RegisteredObject
 {
 
-/// Test directo del Business Process
+/// Test directo del Business Process usando MessageSender
 ClassMethod TestBP() As %Status
 {
     Try {
         Write !,"=== Test GetUserListBP ===",!
         
-        // Crear request vacío (el BP no necesita parámetros de entrada)
+        // Crear request vacío
         Set request = ##class(Ens.Request).%New()
         
-        // Invocar el Business Process directamente
         Write "Invocando Business Process...",!
         
-        // Usar Ens.Director para enviar mensaje al BP
+        // Enviar mensaje usando SendRequestSync directamente
         Set sc = ##class(Ens.Director).CreateBusinessService("EnsLib.Testing.Service",.service)
         If $$$ISERR(sc) {
-            Write "ERROR: No se pudo crear el servicio de testing: ",$System.Status.GetErrorText(sc),!
-            Return sc
-        }
-        
-        // Enviar request al Business Process
-        Set sc = service.SendTestRequest("POC01.BP.GetUserListBP",request,.response,1)
-        
-        If $$$ISERR(sc) {
-            Write "ERROR al invocar BP: ",$System.Status.GetErrorText(sc),!
-            Return sc
+            Write "ERROR: No se pudo crear servicio: ",$System.Status.GetErrorText(sc),!
+            
+            // Intentar método alternativo directo
+            Write !,"Intentando método directo...",!
+            Set bp = ##class(POC01.BP.GetUserListBP).%New()
+            Set sc = bp.OnRequest(request,.response)
+            
+            If $$$ISERR(sc) {
+                Write "ERROR método directo: ",$System.Status.GetErrorText(sc),!
+                Return sc
+            }
+            
+        } Else {
+            // Enviar request usando el servicio
+            Set sc = service.SendTestRequest("POC01.BP.GetUserListBP",request,.response)
+            
+            If $$$ISERR(sc) {
+                Write "ERROR al enviar request: ",$System.Status.GetErrorText(sc),!
+                Return sc
+            }
         }
         
         // Mostrar respuesta
