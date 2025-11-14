@@ -49,9 +49,13 @@ ClassMethod OnPage() As %Status
     Write ".spinner { border: 5px solid rgba(255, 255, 255, 0.3); border-top: 5px solid white; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }",!
     Write "@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }",!
     Write ".footer { background: white; padding: 20px; border-radius: 10px; margin-top: 30px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }",!
+    Write ".refresh-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: white; border: 2px solid #0066cc; color: #0066cc; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s; z-index: 1000; }",!
+    Write ".refresh-btn:hover { background: #0066cc; color: white; transform: rotate(180deg); }",!
+    Write ".refresh-btn:active { transform: rotate(180deg) scale(0.9); }",!
     Write "</style>",!
     Write "</head>",!
     Write "<body>",!
+    Write "<button class='refresh-btn' onclick='refreshPage()' title='Refrescar página'>🔄</button>",!
     Write "<div class='container'>",!
     Write "<header class='header'>",!
     Write "<h1>🔐 Sistema de Gestión de Usuarios SAP</h1>",!
@@ -211,6 +215,9 @@ ClassMethod WriteJavaScript()
     Write "  const data = await apiRequest('/unlock', 'POST', { username });",!
     Write "  displayResult('unlockResult', data);",!
     Write "  return false;",!
+    Write "}",!
+    Write "function refreshPage() {",!
+    Write "  window.location.reload();",!
     Write "}",!
     Write "console.log('POC01 - Loaded');",!
     Write "</script>",!
