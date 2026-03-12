@@ -12,7 +12,7 @@
         }
     },
     "objectscript.conn": {
-        "server": "iriscnet2",
+        "server": "irisestandar",
         "ns": "DEMO",
         "active": true
     }

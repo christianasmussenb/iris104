@@ -174,9 +174,15 @@ ClassMethod WriteJavaScript()
     Write "function formatSuccess(data) {",!
     Write "  if (data.data && Array.isArray(data.data)) {",!
     Write "    let html = '<h3>Usuarios encontrados: ' + data.count + '</h3>';",!
-    Write "    html += '<table class=""user-table""><thead><tr><th>Username</th><th>Nombre</th><th>Apellido</th><th>Nombre Completo</th></tr></thead><tbody>';",!
+    Write "    html += '<table class=""user-table""><thead><tr><th>ID</th><th>Username</th><th>Nombre</th><th>Apellido</th><th>Fullname</th></tr></thead><tbody>';",!
     Write "    data.data.forEach(u => {",!
-    Write "      html += '<tr><td><strong>' + u.username + '</strong></td><td>' + (u.firstname || '-') + '</td><td>' + (u.lastname || '-') + '</td><td>' + (u.fullname || '-') + '</td></tr>';",!
+    Write "      html += '<tr>' +",!
+    Write "        '<td>' + ((u.id !== undefined && u.id !== null && u.id !== '') ? u.id : '-') + '</td>' +",!
+    Write "        '<td><strong>' + (u.username || '-') + '</strong></td>' +",!
+    Write "        '<td>' + (u.firstname || '-') + '</td>' +",!
+    Write "        '<td>' + (u.lastname || '-') + '</td>' +",!
+    Write "        '<td>' + (u.fullname || '-') + '</td>' +",!
+    Write "      '</tr>';",!
     Write "    });",!
     Write "    html += '</tbody></table>';",!
     Write "    return html;",!

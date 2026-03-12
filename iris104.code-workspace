@@ -4,8 +4,8 @@
 			"path": "."
 		},
 		{
-			"name": "iriscnet2:DEMO",
-			"uri": "isfs://iriscnet2:demo/"
+			"name": "irisestandar:DEMO",
+			"uri": "isfs://irisestandar:demo/"
 		}
 	],
 	"settings": {
@@ -16,7 +16,8 @@
 			"active": true,
 			"username": "_SYSTEM",
 			"password": "Compunet123.",
-			"https": false
+			"https": false,
+			"server": "irisestandar"
 		},
 		"objectscript.export": {
 			"folder": "src",
