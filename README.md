@@ -1,284 +1,163 @@
-# POC01 - Sistema de Gestión de Usuarios SAP
+# POC01 - Gestión de Usuarios SAP (Estado Actual)
 
-## 📋 Descripción General
+## Resumen
+POC01 expone una UI web y una API REST para:
+- listar usuarios SAP,
+- verificar existencia,
+- bloquear,
+- desbloquear.
 
-Sistema integral de gestión de usuarios SAP que permite listar, verificar existencia, bloquear y desbloquear usuarios en SAP mediante BAPIs, utilizando InterSystems IRIS como plataforma de integración y SAP JCo 3.1 como conector Java.
+La integración SAP se ejecuta contra la **Operation `SISSSAPOperation`** de la producción activa del namespace (entorno DEMO actual: `PRD.PROD1`).
 
-**Tecnologías:**
-- InterSystems IRIS 2024.1+ / Ensemble
-- SAP JCo 3.1 (sapjco3.jar)
-- Java Runtime Environment (JRE 1.8.0_461)
-- SAP System: cnetdev (Client 600, System 00, Language ES, R3 Name CNQ)
+## Arquitectura implementada
 
-## 🏗️ Arquitectura del Sistema
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Frontend Web (CSP)                        │
-│                 POC01.Web.UserManagementPage.cls                 │
-│                   (HTML + CSS + JavaScript)                      │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ HTTP/REST
-┌────────────────────────────▼────────────────────────────────────┐
-│                      REST API Service                            │
-│              POC01.API.UserManagementService.cls                 │
-│              (Extends %CSP.REST, Ens.BusinessService)            │
-│  Endpoints: /list, /check, /lock, /unlock                       │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ EnsLib.Testing.Service
-┌────────────────────────────▼────────────────────────────────────┐
-│                    Business Processes (BPL)                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌────────┐  ┌──────────┐  │
-│  │GetUserListBP │  │CheckUserBP   │  │LockBP  │  │UnlockBP  │  │
-│  │.cls          │  │ExistenceBP   │  │.cls    │  │.cls      │  │
-│  └──────────────┘  └──────────────┘  └────────┘  └──────────┘  │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ Ens.Request/Response
-┌────────────────────────────▼────────────────────────────────────┐
-│                    Business Operation                            │
-│                 POC01.BO.SAPOperation.cls                        │
-│           (Extends EnsLib.JavaGateway.Operation)                 │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ Java Gateway
-┌────────────────────────────▼────────────────────────────────────┐
-│                    Java Gateway Service                          │
-│              POC01.Services.JavaGatewayService                   │
-│                    (Port 55558)                                  │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ SAP JCo 3.1
-┌────────────────────────────▼────────────────────────────────────┐
-│                        SAP System                                │
-│                    cnetdev (172.10.250.3)                        │
-│              BAPIs: BAPI_USER_GETLIST, etc.                      │
-└──────────────────────────────────────────────────────────────────┘
+```text
+POC01.Web.UserManagementPage (CSP)
+  -> /api/users/* (REST)
+  -> POC01.API.UserManagementService
+  -> Ens.Director.CreateBusinessService("EnsLib.Testing.Service")
+  -> svc.SendTestRequest("SISSSAPOperation", request, .response, ...)
+  -> SAP (BAPIs USER*)
 ```
 
-## 📁 Estructura del Proyecto
+### Importante
+- El flujo productivo actual de la API **no depende de los BPL** `POC01.BP.*`.
+- Los BPL siguen existiendo en el proyecto, pero la API llama directo a `SISSSAPOperation`.
 
+## Componentes clave
+- API REST: `POC01/API/UserManagementService.cls`
+- UI web: `POC01/Web/UserManagementPage.cls`
+- Operation SAP usada: host de producción `SISSSAPOperation` (clase `EnsLib.SAP.Operation`)
+- Clases BAPI: `POC01/BAPI/USER/...`
+
+## Endpoints
+Base: `/api/users`
+
+- `GET /list?maxRows=20&usernameFilter=ADMI*`
+- `POST /check`
+- `POST /lock`
+- `POST /unlock`
+
+## Comportamiento actual por endpoint
+
+### 1) Listar usuarios (`GET /list`)
+Request params:
+- `maxRows` (1..50, default 5)
+- `usernameFilter` (opcional)
+
+Lógica:
+- Solicita a SAP con `BAPI_USER_GETLIST`.
+- Si hay filtro, internamente pide un lote mayor a SAP (`MAXuROWS=2000`) y luego filtra en IRIS.
+- Soporta filtro:
+  - sin comodines: coincidencia por **contiene**
+  - con comodines: `*` (cualquier secuencia), `?` (1 carácter)
+- Si el filtro deja 0 resultados, intenta fallback desde historial local `BAPI_USER_GETLIST.USERLIST`.
+
+Response JSON:
+- `success`, `code`, `date`, `time`, `count`, `data[]`
+- `data[]` incluye: `id`, `username`, `firstname`, `lastname`, `fullname`
+
+### 2) Verificar usuario (`POST /check`)
+Body:
+```json
+{"username":"ADMISIONURG"}
 ```
-POC01/
-├── README.md                          # Este archivo
-├── API.md                             # Documentación de APIs
-├── SPRINTS.md                         # Planificación Sprints 8-10
-│
-├── BO/                                # Business Operations
-│   └── SAPOperation.cls               # Operación SAP via Java Gateway
-│
-├── BP/                                # Business Processes (BPL)
-│   ├── GetUserListBP.cls              # Listar usuarios SAP
-│   ├── CheckUserExistenceBP.cls       # Verificar existencia de usuario
-│   ├── LockUserBP.cls                 # Bloquear usuario
-│   └── UnlockUserBP.cls               # Desbloquear usuario
-│
-├── Messages/                          # Clases de mensajes
-│   ├── BAPI.USER.GETLIST.ISCuRequest.cls
-│   ├── BAPI.USER.EXISTENCE.CHECK.ISCuRequest.cls
-│   ├── BAPI.USER.LOCK.ISCuRequest.cls
-│   └── BAPI.USER.UNLOCK.ISCuRequest.cls
-│
-├── API/                               # REST API
-│   └── UserManagementService.cls      # Servicio REST principal
-│
-├── Services/                          # Servicios Gateway
-│   ├── JavaGatewayService.cls         # Gateway principal (55558)
-│   └── JavaGatewayMYSISSService.cls   # Gateway secundario (55556)
-│
-├── Web/                               # Frontend
-│   └── UserManagementPage.cls         # Página CSP web
-│
-├── Utils/                             # Utilidades
-│   ├── CompileAll.cls                 # Compilar todo el proyecto
-│   ├── ImportAll.cls                  # Importar clases
-│   └── TestGetUserList.cls            # Tests unitarios
-│
-└── PROD01.cls                         # Production configuration
+
+Lógica:
+- Llama `BAPI_USER_EXISTENCE_CHECK`.
+- Mapea existencia desde `ISCuIsOK`, `ISCuErrorMessage`, `RETURN.TYPE`, `RETURN.MESSAGE`.
+- Agrega estado de bloqueo inferido por historial de la app (`APP_HISTORY`) comparando últimas acciones lock/unlock en tablas request.
+
+Response JSON (ejemplo):
+```json
+{
+  "success": 1,
+  "code": "USER_EXISTS",
+  "username": "ADMISIONURG",
+  "exists": 1,
+  "message": "Usuario existe en SAP",
+  "lockStatus": "UNLOCKED",
+  "lockStatusSource": "APP_HISTORY",
+  "lockStatusMessage": "Estado inferido por la ultima accion registrada: DESBLOQUEAR",
+  "date": "2026-03-12",
+  "time": "17:45:10"
+}
 ```
 
-## 🔧 Componentes Principales
+### 3) Bloquear usuario (`POST /lock`)
+Body:
+```json
+{"username":"ADMISIONURG"}
+```
 
-### 1. Java Gateway Service
-**Archivo:** `POC01.Services.JavaGatewayService.cls`
-- **Puerto:** 55558
-- **JavaHome:** /Library/Java/JavaVirtualMachines/jre-1.8.jdk/Contents/Home
-- **ClassPath:** /usr/local/sapjco3/sapjco3.jar
-- **Función:** Conexión con SAP mediante JCo 3.1
+Lógica:
+- Llama `BAPI_USER_LOCK` directo a `SISSSAPOperation`.
+- Extrae resultado principal desde SQL:
+  - `BAPI_USER_LOCK.ISCuResponse`
+  - `BAPI_USER_LOCK.RETURN`
+- Fallback al objeto en memoria si SQL no está disponible.
 
-### 2. Business Operation - SAPOperation
-**Archivo:** `POC01.BO.SAPOperation.cls`
-- Extiende: `EnsLib.JavaGateway.Operation`
-- Ejecuta BAPIs en SAP
-- Transforma respuestas SAP a formato JSON
+Response JSON:
+- éxito: `code=USER_LOCKED`, `message=...`
+- error: `code=USER_LOCK_ERROR`, `error=...`
+- siempre con `date` y `time`
 
-### 3. Business Processes (BPL)
-Todos extienden `Ens.BusinessProcessBPL`:
+### 4) Desbloquear usuario (`POST /unlock`)
+Body:
+```json
+{"username":"ADMISIONURG"}
+```
 
-**GetUserListBP.cls**
-- BAPI: `BAPI_USER_GETLIST`
-- Input: maxRows, WITHuUSERNAME
-- Output: JSON array con usuarios
+Lógica:
+- Llama `BAPI_USER_UNLOCK` directo a `SISSSAPOperation`.
+- Extrae resultado principal desde SQL:
+  - `BAPI_USER_UNLOCK.ISCuResponse`
+  - `BAPI_USER_UNLOCK.RETURN`
+- Fallback al objeto en memoria si SQL no está disponible.
 
-**CheckUserExistenceBP.cls**
-- BAPI: `BAPI_USER_EXISTENCE_CHECK`
-- Input: USERNAME
-- Output: JSON con exists boolean
+Response JSON:
+- éxito: `code=USER_UNLOCKED`, `message=...`
+- error: `code=USER_UNLOCK_ERROR`, `error=...`
+- siempre con `date` y `time`
 
-**LockUserBP.cls**
-- BAPI: `BAPI_USER_LOCK`
-- Input: USERNAME
-- Output: JSON con success/error
+## Respuesta estándar de error
+La API devuelve errores de negocio/técnicos en JSON (habitualmente HTTP 200):
 
-**UnlockUserBP.cls**
-- BAPI: `BAPI_USER_UNLOCK`
-- Input: USERNAME
-- Output: JSON con success/error
+```json
+{
+  "success": 0,
+  "code": "ERROR",
+  "error": "Detalle...",
+  "date": "2026-03-12",
+  "time": "17:50:26"
+}
+```
 
-### 4. REST API Service
-**Archivo:** `POC01.API.UserManagementService.cls`
-- Extiende: `%CSP.REST` y `Ens.BusinessService`
-- Base URL: `/api/users`
+## UI web
+Clase: `POC01/Web/UserManagementPage.cls`
 
-**Endpoints:**
-- `GET /list?maxRows=20` - Listar usuarios
-- `POST /check` - Verificar usuario
-- `POST /lock` - Bloquear usuario
-- `POST /unlock` - Desbloquear usuario
+Incluye:
+- pestaña Listar (con `maxRows` + `usernameFilter`),
+- pestaña Verificar,
+- pestaña Bloquear,
+- pestaña Desbloquear,
+- render de `code` + `date/time` en mensajes.
 
-### 5. Frontend Web
-**Archivo:** `POC01.Web.UserManagementPage.cls`
-- Página CSP nativa (%CSP.Page)
-- URL: `http://iriscnet/irisestandar/csp/demo/POC01.Web.UserManagementPage.cls`
-- Interfaz responsive con 4 pestañas
-- JavaScript para consumir API REST
-
-## 🚀 Configuración y Despliegue
-
-### Prerequisitos
-1. InterSystems IRIS 2024.1+
-2. Java Runtime Environment (JRE 1.8)
-3. SAP JCo 3.1 instalado en `/usr/local/sapjco3/`
-4. Acceso al sistema SAP cnetdev
-
-### Instalación
-
-**1. Compilar clases:**
+## Compilación recomendada
 ```objectscript
-do $system.OBJ.CompilePackage("POC01", "cuk")
+do $system.OBJ.Compile("POC01.API.UserManagementService","cuk")
+do $system.OBJ.Compile("POC01.Web.UserManagementPage","cuk")
 ```
 
-**2. Iniciar Production:**
-```objectscript
-set sc = ##class(Ens.Director).StartProduction("POC01.PROD01")
-```
+## Notas operativas de entorno
+- Namespace objetivo: `DEMO`
+- Producción activa usada en pruebas: `PRD.PROD1`
+- Host de interoperabilidad esperado por la API: `SISSSAPOperation`
 
-**3. Verificar Java Gateway:**
-- Management Portal → Interoperability → Configure → Java Gateway Settings
-- Estado: Connected (Port 55558)
+## Limitaciones conocidas
+- `lockStatus` en `/check` es inferido por historial de la app (`APP_HISTORY`), no lectura directa de estado real SAP en tiempo real.
+- El wrapper de `BAPI_USER_GETLIST` tiene `WITHuUSERNAME` modelado como campo corto; por eso el filtro completo se resuelve localmente.
+- Existen clases BPL `POC01.BP.*` que hoy no están en el flujo principal de la API.
 
-**4. Configurar Web Application:**
-- Ya configurada en `/api/users` para REST API
-- CSP pages accesibles en `/csp/demo/`
-
-### Configuración SAP
-**Conexión SAP (en SAPOperation):**
-- Host: 172.10.250.3
-- Client: 600
-- System Number: 00
-- Language: ES
-- User/Password: Configurados en Production
-
-## 🧪 Testing
-
-### Pruebas con curl
-
-**1. Listar Usuarios:**
-```bash
-curl -u "usuario:password" -X GET "http://iriscnet/api/users/list?maxRows=5"
-```
-
-**2. Verificar Usuario:**
-```bash
-curl -u "usuario:password" -X POST http://iriscnet/api/users/check \
-  -H "Content-Type: application/json" \
-  -d '{"username":"ADSUSER"}'
-```
-
-**3. Bloquear Usuario:**
-```bash
-curl -u "usuario:password" -X POST http://iriscnet/api/users/lock \
-  -H "Content-Type: application/json" \
-  -d '{"username":"TESTUSER"}'
-```
-
-**4. Desbloquear Usuario:**
-```bash
-curl -u "usuario:password" -X POST http://iriscnet/api/users/unlock \
-  -H "Content-Type: application/json" \
-  -d '{"username":"TESTUSER"}'
-```
-
-### Resultados de Pruebas Exitosas
-
-✅ **GetUserListBP**: 233 usuarios retornados (limitados a 20)
-✅ **CheckUserExistenceBP**: ADSUSER verificado correctamente
-✅ **LockUserBP**: ADSUSER bloqueado exitosamente
-✅ **UnlockUserBP**: ADSUSER desbloqueado exitosamente
-✅ **REST API**: Todos los endpoints funcionando
-✅ **Frontend Web**: Interfaz responsive operativa
-
-## 📊 Monitoreo
-
-### Message Viewer
-- Management Portal → Interoperability → Messages
-- Ver flujo completo de mensajes entre componentes
-- Verificar tiempos de respuesta y errores
-
-### Logs del Sistema
-- Management Portal → System Operation → System Logs → Application Error Log
-- Revisar errores de Java Gateway
-- Validar conexiones SAP
-
-## 🔒 Seguridad
-
-- Autenticación HTTP Basic en REST API
-- Autenticación HTTP en páginas CSP
-- Credenciales SAP almacenadas en Production (encriptadas)
-- Web Application configurada con Password authentication
-
-## 📈 Métricas de Rendimiento
-
-- Tiempo promedio de respuesta BAPI: ~1-2 segundos
-- Capacidad: 100+ requests/minuto
-- Máximo usuarios por consulta: 100
-
-## 🐛 Troubleshooting
-
-### Java Gateway no conecta
-```objectscript
-// Verificar puerto
-do ##class(%Net.Remote.Service).StopGateway(55558)
-do ##class(%Net.Remote.Service).StartGateway(55558)
-```
-
-### Error en BAPI
-- Verificar credenciales SAP en Production
-- Revisar conectividad: `ping 172.10.250.3`
-- Validar parámetros de entrada en Message Viewer
-
-### Frontend no carga
-- Verificar compilación: `do $system.OBJ.Compile('POC01.Web.UserManagementPage','cuk')`
-- Verificar Web Application `/csp/demo/` está habilitada
-- Revisar permisos de usuario
-
-## 👥 Autores
-
-- Christian Asmussen B.
-- Proyecto: POC01 - SAP User Management System
-- Fecha: Noviembre 2025
-
-## 📝 Licencia
-
-Uso interno - Organización
-
-## 🔄 Próximos Pasos
-
-Ver archivo `SPRINTS.md` para planificación detallada de Sprints 8-10.
+## Limpieza del proyecto
+Ver checklist: `POC01/CLEANUP_CHECKLIST.md`

@@ -75,6 +75,10 @@ ClassMethod OnPage() As %Status
     Write "<label for='maxRows'>Máximo de registros:</label>",!
     Write "<input type='number' id='maxRows' value='20' min='1' max='100'>",!
     Write "</div>",!
+    Write "<div class='form-group'>",!
+    Write "<label for='usernameFilter'>Filtrar username por letras (prefijo):</label>",!
+    Write "<input type='text' id='usernameFilter' maxlength='20' placeholder='Ej: ADMI'>",!
+    Write "</div>",!
     Write "<button type='submit' class='btn btn-primary'>Obtener Lista</button>",!
     Write "</form>",!
     Write "<div id='listResult' class='result'></div>",!
@@ -165,15 +169,24 @@ ClassMethod WriteJavaScript()
     Write "}",!
     Write "function displayResult(elementId, data) {",!
     Write "  const div = document.getElementById(elementId);",!
+    Write "  const meta = formatMeta(data);",!
     Write "  if (data.success === 1) {",!
     Write "    div.innerHTML = '<div class=""alert alert-success"">' + formatSuccess(data) + '</div>';",!
     Write "  } else {",!
-    Write "    div.innerHTML = '<div class=""alert alert-error"">Error: ' + (data.error || 'Desconocido') + '</div>';",!
+    Write "    div.innerHTML = '<div class=""alert alert-error"">Error: ' + (data.error || 'Desconocido') + meta + '</div>';",!
     Write "  }",!
+    Write "}",!
+    Write "function formatMeta(data) {",!
+    Write "  let parts = [];",!
+    Write "  if (data.code) parts.push('Codigo: ' + data.code);",!
+    Write "  if (data.date || data.time) parts.push('Fecha/Hora: ' + (data.date || '-') + ' ' + (data.time || ''));",!
+    Write "  if (!parts.length) return '';",!
+    Write "  return '<div style=""margin-top:8px;font-size:0.9rem;opacity:0.9;"">' + parts.join(' | ') + '</div>';",!
     Write "}",!
     Write "function formatSuccess(data) {",!
     Write "  if (data.data && Array.isArray(data.data)) {",!
     Write "    let html = '<h3>Usuarios encontrados: ' + data.count + '</h3>';",!
+    Write "    html += formatMeta(data);",!
     Write "    html += '<table class=""user-table""><thead><tr><th>ID</th><th>Username</th><th>Nombre</th><th>Apellido</th><th>Fullname</th></tr></thead><tbody>';",!
     Write "    data.data.forEach(u => {",!
     Write "      html += '<tr>' +",!
@@ -187,15 +200,23 @@ ClassMethod WriteJavaScript()
     Write "    html += '</tbody></table>';",!
     Write "    return html;",!
     Write "  } else if (data.exists !== undefined) {",!
-    Write "    return data.message + '<br><strong>Usuario: ' + data.username + '</strong>';",!
+    Write "    let lockInfo = '';",!
+    Write "    if (data.lockStatus) {",!
+    Write "      lockInfo = '<br><strong>Estado bloqueo: ' + data.lockStatus + '</strong>'; ",!
+    Write "      if (data.lockStatusMessage) lockInfo += '<br>' + data.lockStatusMessage;",!
+    Write "    }",!
+    Write "    return data.message + '<br><strong>Usuario: ' + data.username + '</strong>' + lockInfo + formatMeta(data);",!
     Write "  } else {",!
-    Write "    return data.message + '<br><strong>Usuario: ' + data.username + '</strong>';",!
+    Write "    return data.message + '<br><strong>Usuario: ' + data.username + '</strong>' + formatMeta(data);",!
     Write "  }",!
     Write "}",!
     Write "async function getUsers(e) {",!
     Write "  e.preventDefault();",!
     Write "  const maxRows = document.getElementById('maxRows').value;",!
-    Write "  const data = await apiRequest('/list?maxRows=' + maxRows, 'GET');",!
+    Write "  const usernameFilter = document.getElementById('usernameFilter').value.trim().toUpperCase();",!
+    Write "  const qs = new URLSearchParams({ maxRows: String(maxRows) });",!
+    Write "  if (usernameFilter) qs.set('usernameFilter', usernameFilter);",!
+    Write "  const data = await apiRequest('/list?' + qs.toString(), 'GET');",!
     Write "  displayResult('listResult', data);",!
     Write "  return false;",!
     Write "}",!
